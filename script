@@ -1,0 +1,40 @@
+import pygame
+import pysrt
+import time
+import threading
+
+# Initialize pygame mixer
+pygame.mixer.init()
+
+# Load the audio file
+audio_file = 'path/to/your/audio/file.mp3'
+pygame.mixer.music.load(audio_file)
+
+# Load the subtitles
+srt_file = 'path/to/your/subtitles/file.srt'
+subtitles = pysrt.open(srt_file)
+
+# Function to display subtitles
+def display_subtitles():
+    start_time = time.time()
+    for subtitle in subtitles:
+        while time.time() - start_time < subtitle.start.ordinal / 1000.0:
+            time.sleep(0.01)
+        print(subtitle.text)
+        while time.time() - start_time < subtitle.end.ordinal / 1000.0:
+            time.sleep(0.01)
+        print("\r", end="")
+
+# Start the subtitle display in a separate thread
+subtitle_thread = threading.Thread(target=display_subtitles)
+subtitle_thread.start()
+
+# Play the audio
+pygame.mixer.music.play()
+
+# Wait for the audio to finish
+while pygame.mixer.music.get_busy():
+    time.sleep(1)
+
+# Wait for the subtitle thread to finish
+subtitle_thread.join()
